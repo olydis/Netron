@@ -1,15 +1,15 @@
 <html>
 <head>
 <meta charset='utf-8'>
-<title>{{{title}}}</title>
-<link rel='stylesheet' type='text/css' href='open-sans.css'>
+<link rel='stylesheet' type='text/css' href='../node_modules/npm-font-open-sans/open-sans.css'>
 <link rel='stylesheet' type='text/css' href='view-render.css'>
 <link rel='stylesheet' type='text/css' href='view.css'>
 </head>
 <body>
 <div id='welcome' class='background' style='display: block'>
     <img id='logo' class='center' src='logo.svg' width='128' height='128'>
-    <button id='open-file-button' class='center' style='top: 200px; width: 150px; display: none;'>Open ONNX Model...</button>
+    <button id='open-file-button' class='center' style='top: 200px; width: 125px; opacity: 0;'>Open Model...</button>
+    <input type="file" id="open-file-dialog" style="display:none" accept=".onnx, .pb, .meta, .tflite, .keras, .h5, .json">
     <div id='spinner' class='spinner' style='display: none'></div>
     <!-- Preload fonts to workaround Chrome SVG layout issue -->
     <div style='font-weight: normal; color: #e6e6e6; user-select: none;'>.</div>
@@ -24,12 +24,12 @@
     <div id='sidebar-content' class='sidebar-content'>
     </div>
 </div>
-<script type='text/javascript' src='d3.min.js'></script>
-<script type='text/javascript' src='dagre.min.js'></script>
-<script type='text/javascript' src='protobuf.min.js'></script>
-<script type='text/javascript' src='flatbuffers.js'></script>
-<script type='text/javascript' src='handlebars.min.js'></script>
-<script type='text/javascript' src='marked.min.js'></script>
+<script type='text/javascript' src='../node_modules/d3/build/d3.js'></script>
+<script type='text/javascript' src='../node_modules/dagre/dist/dagre.js'></script>
+<script type='text/javascript' src='../node_modules/protobufjs/dist/protobuf.js'></script>
+<script type='text/javascript' src='../node_modules/flatbuffers/js/flatbuffers.js'></script>
+<script type='text/javascript' src='../node_modules/handlebars/dist/handlebars.min.js'></script>
+<script type='text/javascript' src='../node_modules/marked/marked.min.js'></script>
 <script type='text/javascript' src='onnx.js'></script>
 <script type='text/javascript' src='onnx-model.js'></script>
 <script type='text/javascript' src='tf.js'></script>
