@@ -416,6 +416,9 @@ function showModelSummary(model) {
     var template = Handlebars.compile(summaryTemplate, 'utf-8');
     var data = template(model);
     sidebar.open(data, 'Summary', '100%');
+
+    // TODO:
+    model.graphs[0].forward({ '1': [Array.apply(null, Array(53)).map(() => 0)] });
 }
 
 function showNodeInput(input) {
