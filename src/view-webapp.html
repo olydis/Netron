@@ -18,6 +18,7 @@
 </div>
 <svg id='graph' class='graph' preserveAspectRatio='xMidYMid meet' width='100%' height='100%'></svg>
 <button id='navigation-button' style='position: absolute; top: 10px; left: 10px; display: none;'>Summary</button> 
+<button id='show-runner-button' style='position: absolute; top: 10px; left: 100px; display: none;'>Run</button> 
 <div id='sidebar' class='sidebar'>
     <h1 id='sidebar-title' class='sidebar-title'></h1>
     <a href='javascript:void(0)' id='sidebar-closebutton' class='sidebar-closebutton'>&times;</a>
@@ -42,5 +43,11 @@
 <script type='text/javascript' src='view-webapp.js'></script>
 <script type='text/javascript' src='view-render.js'></script>
 <script type='text/javascript' src='view.js'></script>
+<script type='text/javascript' src='runtime.js'></script>
+
+<div style="position: fixed; background: cornflowerblue; top: 30px; padding: 30px; display: none; text-align: center;" id="runner">
+ 
+</div>
+
 </body>
 </html>

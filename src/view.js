@@ -12,6 +12,13 @@ if (navigationButton) {
     });
 }
 
+var runnerButton = document.getElementById('show-runner-button');
+if (runnerButton) {
+    runnerButton.addEventListener('click', (e) => {
+        showModelRunner(modelService.activeModel);
+    });
+}
+
 function updateView(page) {
 
     var welcomeElement = document.getElementById('welcome');
@@ -19,6 +26,7 @@ function updateView(page) {
     var spinnerElement = document.getElementById('spinner');
     var graphElement = document.getElementById('graph');
     var navigationElement = document.getElementById('navigation-button');
+    var runnerElement = document.getElementById('show-runner-button');
 
     if (page == 'welcome') {
         document.body.style.cursor = 'default';
@@ -29,6 +37,7 @@ function updateView(page) {
         graphElement.style.display = 'none';
         graphElement.style.opacity = 0;
         navigationElement.style.display = 'none';
+        runnerElement.style.display = 'none';
     }
 
     if (page == 'spinner') {
@@ -40,6 +49,7 @@ function updateView(page) {
         graphElement.style.display = 'block';
         graphElement.style.opacity = 0;
         navigationElement.style.display = 'none';
+        runnerElement.style.display = 'none';
     }
 
     if (page == 'graph') {
@@ -49,6 +59,7 @@ function updateView(page) {
         graphElement.style.display = 'block';
         graphElement.style.opacity = 1;
         navigationElement.style.display = 'block';
+        runnerElement.style.display = 'block';
         document.body.style.cursor = 'default';
     }
 }
@@ -412,13 +423,184 @@ function updateGraph(model) {
     }, 20);
 }
 
+function uniform2normal(x) {
+    x = x * 0.9 + 0.05;
+    return Math.log(x / (1 - x));
+}
+
 function showModelSummary(model) {
     var template = Handlebars.compile(summaryTemplate, 'utf-8');
     var data = template(model);
     sidebar.open(data, 'Summary', '100%');
+}
 
-    // TODO:
-    model.graphs[0].forward({ '1': [Array.apply(null, Array(53)).map(() => 0)] });
+function showModelRunner(model) {
+    const runner = document.getElementById('runner');
+    runner.innerText = "";
+
+    const createSlider = () => {
+        const result = document.createElement("input");
+        result.type = "range";
+        result.min = 0;
+        result.max = 100;
+        result.value = 50;
+        return result;
+    };
+    const addUI = (element) => {
+        runner.appendChild(element);
+        runner.appendChild(document.createElement("br"));
+        return element;
+    };
+    
+    // UI setup
+    if (model.graphs[0].inputs[0].type === "float[1,53]") {
+        const slider1 = addUI(createSlider());
+        const slider2 = addUI(createSlider());
+        const slider3 = addUI(createSlider());
+        const renderTarget = addUI(document.createElement("canvas"));
+        renderTarget.width = 1024;
+        renderTarget.height = 1024;
+        renderTarget.style = "border: 1px solid black; background: white; width: 512px; height: 512px;";
+
+        const randInput = [];
+        for (let i = 0; i < 100; ++i)
+            randInput.push(Array.apply(null, Array(50)).map(() => uniform2normal(Math.random())));
+        const update = () => {
+            const s = [uniform2normal(slider1.value / 100), uniform2normal(slider2.value / 100), uniform2normal(slider3.value / 100)];
+            const batch = randInput.map(i => ({ '1': [s.concat(i)] }));
+
+            console.time();
+            const result = forward(model.graphs[0], batch);
+            console.timeEnd();
+
+            const ctx = renderTarget.getContext('2d');
+
+            ctx.fillStyle = "red";
+            ctx.strokeStyle = "black";
+            ctx.resetTransform();
+            ctx.clearRect(0, 0, renderTarget.width, renderTarget.height);
+            ctx.translate(renderTarget.width / 2, renderTarget.height / 2);
+            for (const point of result) {
+                const p = Object.values(point)[0][0];
+                ctx.beginPath();
+                ctx.arc(p[0] * 10, p[1] * 10, 8, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+        };
+
+        slider1.onchange = update;
+        slider2.onchange = update;
+        slider3.onchange = update;
+        slider1.oninput = update;
+        slider2.oninput = update;
+        slider3.oninput = update;
+        update();
+    }
+    else if (model.graphs[0].inputs[0].type === "float[1,10]") {
+        const slider1 = addUI(createSlider());
+        const slider2 = addUI(createSlider());
+        const slider3 = addUI(createSlider());
+        const slider4 = addUI(createSlider());
+        const slider5 = addUI(createSlider());
+        const renderTarget = addUI(document.createElement("canvas"));
+        renderTarget.width = 1024;
+        renderTarget.height = 1024;
+        renderTarget.style = "border: 1px solid black; background: white; width: 512px; height: 512px;";
+
+        const randInput = [];
+        for (let i = 0; i < 100; ++i)
+            randInput.push(Array.apply(null, Array(5)).map(() => uniform2normal(Math.random())));
+        const update = () => {
+            const s = [
+                uniform2normal(slider1.value / 100), 
+                uniform2normal(slider2.value / 100), 
+                uniform2normal(slider3.value / 100), 
+                uniform2normal(slider4.value / 100), 
+                uniform2normal(slider5.value / 100)];
+            const batch = randInput.map(i => ({ '1': [s.concat(i)] }));
+
+            console.time();
+            const result = forward(model.graphs[0], batch);
+            console.timeEnd();
+
+            const ctx = renderTarget.getContext('2d');
+
+            ctx.fillStyle = "red";
+            ctx.strokeStyle = "black";
+            ctx.resetTransform();
+            ctx.clearRect(0, 0, renderTarget.width, renderTarget.height);
+            ctx.translate(renderTarget.width / 2, renderTarget.height / 2);
+            for (const point of result) {
+                const p = Object.values(point)[0][0];
+                ctx.beginPath();
+                ctx.arc(p[0] * 10, p[1] * 10, 8, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+        };
+
+        slider1.onchange = update;
+        slider2.onchange = update;
+        slider3.onchange = update;
+        slider4.onchange = update;
+        slider5.onchange = update;
+        slider1.oninput = update;
+        slider2.oninput = update;
+        slider3.oninput = update;
+        slider4.oninput = update;
+        slider5.oninput = update;
+        update();
+    }
+    else if (model.graphs[0].inputs[0].type === "float[1,128]") {
+        const slider1 = addUI(createSlider());
+        const slider2 = addUI(createSlider());
+        const slider3 = addUI(createSlider());
+        const renderTarget = addUI(document.createElement("canvas"));
+        renderTarget.width = 1024;
+        renderTarget.height = 1024;
+        renderTarget.style = "border: 1px solid black; background: white; width: 512px; height: 512px;";
+
+        const randInput = Array.apply(null, Array(125)).map(() => uniform2normal(Math.random()));
+        const update = () => {
+            const s = [uniform2normal(slider1.value / 100), uniform2normal(slider2.value / 100), uniform2normal(slider3.value / 100)];
+            const batch = [{ '1': [s.concat(randInput)] }];
+
+            console.time();
+            const result = forward(model.graphs[0], batch);
+            console.timeEnd();
+
+            const ctx = renderTarget.getContext('2d');
+
+            ctx.fillStyle = "red";
+            ctx.strokeStyle = "black";
+            ctx.resetTransform();
+            ctx.clearRect(0, 0, renderTarget.width, renderTarget.height);
+            ctx.translate(renderTarget.width / 2, renderTarget.height / 2);
+            const encoding = Object.values(result[0])[0][0];
+            for (let i = 0; i < encoding.length - 1; i += 2) {
+                const point = [encoding[2*i], encoding[2*i + 1]];
+                ctx.beginPath();
+                ctx.arc(point[0] * 100, point[1] * 100, 8, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+        };
+
+        slider1.onchange = update;
+        slider2.onchange = update;
+        slider3.onchange = update;
+        slider1.oninput = update;
+        slider2.oninput = update;
+        slider3.oninput = update;
+        update();
+    }
+    else
+        throw alert("unknown layout")
+    runner.style.display = "block";
 }
 
 function showNodeInput(input) {

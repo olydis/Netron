@@ -206,93 +206,6 @@ class OnnxGraph {
         var initializer = this._initializerMap[input];
         return initializer ? initializer : null;
     }
-
-    forwardOperator(operator, attributes, inputs) {
-        // TODO debugger;
-        console.log(operator, Object.keys(attributes), Object.keys(inputs));
-        return {};
-    }
-
-    forward(inputs) {
-        const dependencies = {};
-        for (const node of this.nodes) {
-            for (const output of node.outputs) {
-                for (const outputConnection of output.connections) {
-                    const outputConnectionId = outputConnection.id;
-                    const dependencyNode = dependencies[outputConnectionId] = dependencies[outputConnectionId] || { node: node, inputs: {} };
-                    for (const input of node.inputs) {
-                        for (const inputConnection of input.connections) {
-                            const inputConnectionId = inputConnection.id;
-                            dependencyNode.inputs[inputConnectionId] = true;
-                        }
-                    }
-                }
-            }
-        }
-        const topoSort = [];
-        const dfs = (id) => {
-            if (id in dependencies) {
-                const dependsOn = dependencies[id];
-                delete dependencies[id];
-                for (const depId in dependsOn.inputs) {
-                    dfs(depId);
-                }
-                topoSort.push(dependsOn.node);
-            }
-        };
-        for (const id in dependencies) {
-            dfs(id);
-        }
-
-        const data = {};
-        for (const node of topoSort) {
-            // fetch inputs
-            const opInput = {};
-            for (const input of node.inputs) {
-                for (const inputConnection of input.connections) {
-                    const inputConnectionId = inputConnection.id;
-                    // already set?
-                    if (inputConnectionId in data) {
-                        continue;
-                    }
-                    // input?
-                    if (inputConnectionId in inputs) {
-                        data[inputConnectionId] = inputs[inputConnectionId];
-                        continue;
-                    }
-                    // initializer?
-                    const init = this.getInitializer(inputConnectionId);
-                    if (init) {
-                        data[inputConnectionId] = JSON.parse(init.value);
-                        continue;
-                    }
-                    // fail
-                    throw new Error(`Could not find source of input '${inputConnectionId}'.`);
-                }
-                opInput[input.name] = data[input.connections[0].id];
-            }
-            // fetch attributes
-            const attributes = {};
-            for (const attrib of node.attributes) {
-                attributes[attrib.name] = attrib.value;
-            }
-            // execute
-            const opOutput = this.forwardOperator(node.operator, attributes, opInput);
-            // write outputs
-            for (const output of node.outputs) {
-                for (const outputConnection of output.connections) {
-                    const outputConnectionId = outputConnection.id;
-                    data[outputConnectionId] = opOutput[output.name];
-                }
-            }
-        }
-
-        const result = {};
-        for (const output of this.outputs) {
-            result[output.id] = data[output.id];
-        }
-        return result;
-    }
 }
 
 class OnnxNode {
@@ -571,7 +484,7 @@ class OnnxTensor {
         var size = this._tensor.dims[dimension];
         if (dimension == this._tensor.dims.length - 1) {
             for (var i = 0; i < size; i++) {
-                if (this._count > 10000) {
+                if (this._count > 20000) {
                     results.push('...');
                     return results;
                 }
@@ -618,7 +531,7 @@ class OnnxTensor {
         }
         else {
             for (var j = 0; j < size; j++) {
-                if (this._count > 10000) {
+                if (this._count > 20000) {
                     results.push('...');
                     return results;
                 }
